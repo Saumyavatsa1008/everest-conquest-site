@@ -1,26 +1,244 @@
 @import "tailwindcss";
 
+/* ============================================================
+   EVEREST CONQUEST — Theme tokens
+   Bright icy-blue brand palette (matches the box art)
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ice-50: #f4fbff;
+  --ice-100: #e6f5fe;
+  --ice-200: #cdebfb;
+  --ice-300: #a7dbf6;
+  --ice-400: #74c2ee;
+  --sky: #bfe3f7;
+  /* Alpine Dusk — deep navy → twilight → glacial blue summit sky */
+  --navy: #0b2138;
+  --navy-2: #14375c;
+  --teal: #2a6ea0;
+  --dusk-1: #0b2138;
+  --dusk-2: #14375c;
+  --dusk-3: #1d4f7e;
+  --dusk-4: #2a6ea0;
+  --orange: #ff7a18;
+  --orange-2: #ff9742;
+  --gold: #ffc24b;
+  --snow: #ffffff;
+
+  --background: var(--dusk-1);
+  --foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-ice-50: var(--ice-50);
+  --color-ice-100: var(--ice-100);
+  --color-ice-200: var(--ice-200);
+  --color-ice-300: var(--ice-300);
+  --color-ice-400: var(--ice-400);
+  --color-sky: var(--sky);
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-teal: var(--teal);
+  --color-dusk-1: var(--dusk-1);
+  --color-dusk-2: var(--dusk-2);
+  --color-dusk-3: var(--dusk-3);
+  --color-dusk-4: var(--dusk-4);
+  --color-orange: var(--orange);
+  --color-orange-2: var(--orange-2);
+  --color-gold: var(--gold);
+  --color-snow: var(--snow);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--dusk-1);
+  background-image: linear-gradient(
+    180deg,
+    #0b2138 0%,
+    #14375c 30%,
+    #1d4f7e 62%,
+    #2a6ea0 100%
+  );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--orange);
+  color: #fff;
+}
+
+/* Headings use the chunky display face, like the box logo */
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 11px;
+}
+::-webkit-scrollbar-track {
+  background: var(--ice-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ice-400);
+  border-radius: 999px;
+  border: 2px solid var(--ice-100);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--teal);
+}
+
+/* ============================================================
+   Utility helpers
+   ============================================================ */
+.text-stroke-navy {
+  -webkit-text-stroke: 2px var(--navy);
+  paint-order: stroke fill;
+}
+
+/* sections sit over the fixed sky; a faint frost adds depth without hiding it */
+.gradient-ice {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(11, 33, 56, 0.12) 100%
+  );
+}
+
+.gradient-sky-hero {
+  background: transparent;
+}
+
+.gradient-orange {
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-2) 100%);
+}
+
+.text-gradient-orange {
+  background: linear-gradient(135deg, var(--orange) 0%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.shadow-card {
+  box-shadow: 0 20px 45px -20px rgba(14, 44, 71, 0.45);
+}
+.shadow-soft {
+  box-shadow: 0 12px 30px -14px rgba(14, 44, 71, 0.3);
+}
+
+/* Topographic line texture overlay (brand motif) */
+.topo {
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      transparent 0,
+      transparent 38px,
+      rgba(43, 111, 147, 0.06) 39px,
+      transparent 40px
+    ),
+    radial-gradient(
+      circle at 70% 60%,
+      transparent 0,
+      transparent 60px,
+      rgba(43, 111, 147, 0.05) 61px,
+      transparent 62px
+    );
+  background-size: 220px 220px, 320px 320px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================================
+   Keyframe animations
+   ============================================================ */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+.animate-floaty { animation: floaty 6s ease-in-out infinite; }
+
+@keyframes floaty-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-22px); }
+}
+.animate-floaty-slow { animation: floaty-slow 9s ease-in-out infinite; }
+
+@keyframes drift {
+  from { transform: translateX(-10%); }
+  to { transform: translateX(110%); }
+}
+
+/* continuous right-to-left card marquee (content is duplicated, so -50% loops) */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 50s linear infinite;
+  will-change: transform;
+}
+.marquee-pause:hover .animate-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-bob { animation: bob 2.4s ease-in-out infinite; }
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Reveal-on-scroll base (toggled by IntersectionObserver via .in-view) */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+  .animate-floaty, .animate-floaty-slow, .animate-bob, .animate-marquee { animation: none; }
 }

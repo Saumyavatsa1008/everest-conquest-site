@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# form submissions saved by the JSON-file store
+/data
+
 # next.js
 /.next/
 /out/
