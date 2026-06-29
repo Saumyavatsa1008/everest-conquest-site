@@ -1,15 +1,20 @@
 import { promises as fs } from "fs";
 import path from "path";
-import os from "os";
+import { Redis } from "@upstash/redis";
 
 /**
- * Lightweight JSON-file storage for form submissions.
+ * Storage for form submissions.
  *
- * Locally, records are appended to ./data/<name>.json so you can open the file
- * and read every submission. On a read-only/serverless host (e.g. Vercel) the
- * project directory isn't writable, so we transparently fall back to the OS temp
- * dir. For durable production storage, swap the body of these two functions for
- * a real database (Postgres, Supabase, etc.) — the call sites won't change.
+ * In production (Vercel) we use Upstash Redis — a durable, serverless data store.
+ * The whole list for each form is kept as a single JSON value under the key
+ * `everest:<name>`, mirroring the local JSON-file layout so every helper below
+ * behaves identically in both environments.
+ *
+ * Locally (no Redis env vars) we fall back to ./data/<name>.json so you can open
+ * the file and read submissions during development.
+ *
+ * The Upstash integration on Vercel injects either KV_REST_API_* or
+ * UPSTASH_REDIS_REST_* variables — we accept both.
  */
 
 export type Submission = Record<string, unknown> & {
@@ -17,9 +22,22 @@ export type Submission = Record<string, unknown> & {
   createdAt: string;
 };
 
+const REDIS_URL =
+  process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const REDIS_TOKEN =
+  process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
+const redis =
+  REDIS_URL && REDIS_TOKEN
+    ? new Redis({ url: REDIS_URL, token: REDIS_TOKEN })
+    : null;
+
+const keyFor = (name: string) => `everest:${name}`;
+
+// ---- local file fallback (development) ---------------------------------------
+
 function dataDir(): string {
-  // Prefer a project-local ./data folder; fall back to temp if not writable.
-  return process.env.VERCEL ? path.join(os.tmpdir(), "everest-data") : path.join(process.cwd(), "data");
+  return path.join(process.cwd(), "data");
 }
 
 async function fileFor(name: string): Promise<string> {
@@ -28,7 +46,7 @@ async function fileFor(name: string): Promise<string> {
   return path.join(dir, `${name}.json`);
 }
 
-export async function readAll(name: string): Promise<Submission[]> {
+async function readFromFile(name: string): Promise<Submission[]> {
   try {
     const file = await fileFor(name);
     const raw = await fs.readFile(file, "utf8");
@@ -36,6 +54,29 @@ export async function readAll(name: string): Promise<Submission[]> {
   } catch {
     return [];
   }
+}
+
+async function writeToFile(name: string, all: Submission[]): Promise<void> {
+  const file = await fileFor(name);
+  await fs.writeFile(file, JSON.stringify(all, null, 2), "utf8");
+}
+
+// ---- unified read / write ----------------------------------------------------
+
+export async function readAll(name: string): Promise<Submission[]> {
+  if (redis) {
+    const data = await redis.get<Submission[]>(keyFor(name));
+    return Array.isArray(data) ? data : [];
+  }
+  return readFromFile(name);
+}
+
+async function writeAll(name: string, all: Submission[]): Promise<void> {
+  if (redis) {
+    await redis.set(keyFor(name), all);
+    return;
+  }
+  await writeToFile(name, all);
 }
 
 export async function append(
@@ -51,8 +92,7 @@ export async function append(
     ...record,
   };
   existing.push(entry);
-  const file = await fileFor(name);
-  await fs.writeFile(file, JSON.stringify(existing, null, 2), "utf8");
+  await writeAll(name, existing);
   return entry;
 }
 
@@ -75,8 +115,7 @@ export async function update(
   const idx = all.findIndex((r) => r.id === id);
   if (idx === -1) return undefined;
   all[idx] = { ...all[idx], ...patch };
-  const file = await fileFor(name);
-  await fs.writeFile(file, JSON.stringify(all, null, 2), "utf8");
+  await writeAll(name, all);
   return all[idx];
 }
 
