@@ -10,7 +10,7 @@ export default function GameComponents() {
           <p className="text-lg font-extrabold uppercase tracking-[0.18em] text-orange sm:text-xl">
             What&apos;s inside the box?
           </p>
-          <h2 className="font-display mt-4 whitespace-nowrap text-3xl text-white sm:text-5xl">
+          <h2 className="font-display mt-4 text-3xl text-white sm:text-5xl">
             Everything you need for the climb
           </h2>
         </Reveal>

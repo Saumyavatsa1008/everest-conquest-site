@@ -61,10 +61,10 @@ export default function Journey() {
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-gold">
             The Adventure to the Top
           </p>
-          <h2 className="font-display mt-4 whitespace-nowrap text-4xl sm:text-5xl">
+          <h2 className="font-display mt-4 text-4xl sm:text-5xl">
             From Kathmandu to <span className="text-gradient-orange">8,848 m</span>
           </h2>
-          <p className="mt-5 whitespace-nowrap text-white/70">
+          <p className="mt-5 text-white/70">
             Every camp brings a new gamble — weather, oxygen, money and nerve.
             Scroll to follow the climb.
           </p>
